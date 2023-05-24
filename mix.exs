@@ -25,7 +25,7 @@ defmodule LokiLogger.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:httpoison, "~> 1.5"},
+      {:httpoison, "~> 2.1"},
       {:json, "~> 1.3"},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:benchee, "~> 1.0", only: :test},
