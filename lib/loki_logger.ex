@@ -88,9 +88,11 @@ defmodule LokiLogger do
       Keyword.get(config, :metadata, :all)
       |> configure_metadata()
 
+    runtime_config = Application.get_env(:logger, :loki_logger, [])
+
     max_buffer = Keyword.get(config, :max_buffer, 32)
     loki_labels = Keyword.get(config, :loki_labels, %{application: "loki_logger_library"})
-    loki_host = Keyword.get(config, :loki_host, "http://localhost:3100")
+    loki_host = Keyword.get(runtime_config, :loki_host, "http://localhost:3100")
     loki_scope_org_id = Keyword.get(config, :loki_scope_org_id, "fake")
 
     %{
