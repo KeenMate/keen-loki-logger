@@ -2,6 +2,8 @@ defmodule LokiLogger do
   @behaviour :gen_event
   @moduledoc false
 
+  @default_loki_host "http://localhost:3100"
+
   defstruct buffer: [],
             buffer_size: 0,
             format: nil,
@@ -90,9 +92,12 @@ defmodule LokiLogger do
 
     runtime_config = Application.get_env(:logger, :loki_logger, [])
 
+    loki_host_config =
+      get_loki_host_config(Keyword.get(runtime_config, :loki_host, @default_loki_host))
+
     max_buffer = Keyword.get(config, :max_buffer, 32)
     loki_labels = Keyword.get(config, :loki_labels, %{application: "loki_logger_library"})
-    loki_host = Keyword.get(runtime_config, :loki_host, "http://localhost:3100")
+    loki_host = loki_host_config
     loki_scope_org_id = Keyword.get(config, :loki_scope_org_id, "fake")
 
     %{
@@ -106,6 +111,9 @@ defmodule LokiLogger do
         loki_scope_org_id: loki_scope_org_id
     }
   end
+
+  defp get_loki_host_config({_, _, _}), do: @default_loki_host
+  defp get_loki_host_config(loki_host), do: loki_host
 
   defp configure_metadata(:all), do: :all
   defp configure_metadata(metadata), do: Enum.reverse(metadata)
