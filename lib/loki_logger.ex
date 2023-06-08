@@ -15,7 +15,7 @@ defmodule LokiLogger do
             loki_scope_org_id: nil
 
   def init(LokiLogger) do
-    config = Application.get_env(:logger, :loki_logger)
+    config = Application.get_env(:logger, :loki_logger) || [level: :info]
     {:ok, init(config, %__MODULE__{})}
   end
 
