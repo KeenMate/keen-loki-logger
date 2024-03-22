@@ -1,221 +1,383 @@
+defmodule Logproto.Direction do
+  @moduledoc false
+  use Protobuf, enum: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :FORWARD, 0
+  field :BACKWARD, 1
+end
+
 defmodule Logproto.PushRequest do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          streams: [Logproto.Stream.t()]
-        }
-  defstruct [:streams]
-
-  field(:streams, 1, repeated: true, type: Logproto.Stream)
+  field :streams, 1, repeated: true, type: Logproto.StreamAdapter, deprecated: false
 end
 
 defmodule Logproto.PushResponse do
   @moduledoc false
-  use Protobuf, syntax: :proto3
-
-  @type t :: %__MODULE__{}
-  defstruct []
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 end
 
 defmodule Logproto.QueryRequest do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          query: String.t(),
-          limit: non_neg_integer,
-          start: Google.Protobuf.Timestamp.t() | nil,
-          end: Google.Protobuf.Timestamp.t() | nil,
-          direction: atom | integer,
-          regex: String.t()
-        }
-  defstruct [:query, :limit, :start, :end, :direction, :regex]
+  field :selector, 1, type: :string
+  field :limit, 2, type: :uint32
+  field :start, 3, type: Google.Protobuf.Timestamp, deprecated: false
+  field :end, 4, type: Google.Protobuf.Timestamp, deprecated: false
+  field :direction, 5, type: Logproto.Direction, enum: true
+  field :shards, 7, repeated: true, type: :string, deprecated: false
+  field :deletes, 8, repeated: true, type: Logproto.Delete
+end
 
-  field(:query, 1, type: :string)
-  field(:limit, 2, type: :uint32)
-  field(:start, 3, type: Google.Protobuf.Timestamp)
-  field(:end, 4, type: Google.Protobuf.Timestamp)
-  field(:direction, 5, type: Logproto.Direction, enum: true)
-  field(:regex, 6, type: :string)
+defmodule Logproto.SampleQueryRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :selector, 1, type: :string
+  field :start, 2, type: Google.Protobuf.Timestamp, deprecated: false
+  field :end, 3, type: Google.Protobuf.Timestamp, deprecated: false
+  field :shards, 4, repeated: true, type: :string, deprecated: false
+  field :deletes, 5, repeated: true, type: Logproto.Delete
+end
+
+defmodule Logproto.Delete do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :selector, 1, type: :string
+  field :start, 2, type: :int64
+  field :end, 3, type: :int64
 end
 
 defmodule Logproto.QueryResponse do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          streams: [Logproto.Stream.t()]
-        }
-  defstruct [:streams]
+  field :streams, 1, repeated: true, type: Logproto.StreamAdapter, deprecated: false
+  field :stats, 2, type: Stats.Ingester, deprecated: false
+end
 
-  field(:streams, 1, repeated: true, type: Logproto.Stream)
+defmodule Logproto.SampleQueryResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :series, 1, repeated: true, type: Logproto.Series, deprecated: false
+  field :stats, 2, type: Stats.Ingester, deprecated: false
 end
 
 defmodule Logproto.LabelRequest do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          name: String.t(),
-          values: boolean,
-          start: Google.Protobuf.Timestamp.t() | nil,
-          end: Google.Protobuf.Timestamp.t() | nil
-        }
-  defstruct [:name, :values, :start, :end]
+  field :name, 1, type: :string
+  field :values, 2, type: :bool
+  field :start, 3, type: Google.Protobuf.Timestamp, deprecated: false
+  field :end, 4, type: Google.Protobuf.Timestamp, deprecated: false
+end
 
-  field(:name, 1, type: :string)
-  field(:values, 2, type: :bool)
-  field(:start, 3, type: Google.Protobuf.Timestamp)
-  field(:end, 4, type: Google.Protobuf.Timestamp)
+defmodule Logproto.RateLimitedStream do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :labels, 1, type: :string
 end
 
 defmodule Logproto.LabelResponse do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          values: [String.t()]
-        }
-  defstruct [:values]
-
-  field(:values, 1, repeated: true, type: :string)
+  field :values, 1, repeated: true, type: :string
 end
 
-defmodule Logproto.Stream do
+defmodule Logproto.StreamAdapter do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          labels: String.t(),
-          entries: [Logproto.Entry.t()]
-        }
-  defstruct [:labels, :entries]
-
-  field(:labels, 1, type: :string)
-  field(:entries, 2, repeated: true, type: Logproto.Entry)
+  field :labels, 1, type: :string, deprecated: false
+  field :entries, 2, repeated: true, type: Logproto.EntryAdapter, deprecated: false
+  field :hash, 3, type: :uint64, deprecated: false
 end
 
-defmodule Logproto.Entry do
+defmodule Logproto.EntryAdapter do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          timestamp: Google.Protobuf.Timestamp.t() | nil,
-          line: String.t()
-        }
-  defstruct [:timestamp, :line]
+  field :timestamp, 1, type: Google.Protobuf.Timestamp, deprecated: false
+  field :line, 2, type: :string, deprecated: false
+end
 
-  field(:timestamp, 1, type: Google.Protobuf.Timestamp)
-  field(:line, 2, type: :string)
+defmodule Logproto.Sample do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :timestamp, 1, type: :int64, deprecated: false
+  field :value, 2, type: :double, deprecated: false
+  field :hash, 3, type: :uint64, deprecated: false
+end
+
+defmodule Logproto.LegacySample do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :value, 1, type: :double
+  field :timestamp_ms, 2, type: :int64, json_name: "timestampMs"
+end
+
+defmodule Logproto.Series do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :labels, 1, type: :string, deprecated: false
+  field :samples, 2, repeated: true, type: Logproto.Sample, deprecated: false
+  field :streamHash, 3, type: :uint64, deprecated: false
 end
 
 defmodule Logproto.TailRequest do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          query: String.t(),
-          regex: String.t(),
-          delayFor: non_neg_integer,
-          limit: non_neg_integer,
-          start: Google.Protobuf.Timestamp.t() | nil
-        }
-  defstruct [:query, :regex, :delayFor, :limit, :start]
-
-  field(:query, 1, type: :string)
-  field(:regex, 2, type: :string)
-  field(:delayFor, 3, type: :uint32)
-  field(:limit, 4, type: :uint32)
-  field(:start, 5, type: Google.Protobuf.Timestamp)
+  field :query, 1, type: :string
+  field :delayFor, 3, type: :uint32
+  field :limit, 4, type: :uint32
+  field :start, 5, type: Google.Protobuf.Timestamp, deprecated: false
 end
 
 defmodule Logproto.TailResponse do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          stream: Logproto.Stream.t() | nil,
-          droppedStreams: [Logproto.DroppedStream.t()]
-        }
-  defstruct [:stream, :droppedStreams]
+  field :stream, 1, type: Logproto.StreamAdapter, deprecated: false
+  field :droppedStreams, 2, repeated: true, type: Logproto.DroppedStream
+end
 
-  field(:stream, 1, type: Logproto.Stream)
-  field(:droppedStreams, 2, repeated: true, type: Logproto.DroppedStream)
+defmodule Logproto.SeriesRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :start, 1, type: Google.Protobuf.Timestamp, deprecated: false
+  field :end, 2, type: Google.Protobuf.Timestamp, deprecated: false
+  field :groups, 3, repeated: true, type: :string
+  field :shards, 4, repeated: true, type: :string, deprecated: false
+end
+
+defmodule Logproto.SeriesResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :series, 1, repeated: true, type: Logproto.SeriesIdentifier, deprecated: false
+end
+
+defmodule Logproto.SeriesIdentifier.LabelsEntry do
+  @moduledoc false
+  use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
+defmodule Logproto.SeriesIdentifier do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :labels, 1, repeated: true, type: Logproto.SeriesIdentifier.LabelsEntry, map: true
 end
 
 defmodule Logproto.DroppedStream do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          from: Google.Protobuf.Timestamp.t() | nil,
-          to: Google.Protobuf.Timestamp.t() | nil,
-          labels: String.t()
-        }
-  defstruct [:from, :to, :labels]
-
-  field(:from, 1, type: Google.Protobuf.Timestamp)
-  field(:to, 2, type: Google.Protobuf.Timestamp)
-  field(:labels, 3, type: :string)
+  field :from, 1, type: Google.Protobuf.Timestamp, deprecated: false
+  field :to, 2, type: Google.Protobuf.Timestamp, deprecated: false
+  field :labels, 3, type: :string
 end
 
 defmodule Logproto.TimeSeriesChunk do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          from_ingester_id: String.t(),
-          user_id: String.t(),
-          labels: [Logproto.LabelPair.t()],
-          chunks: [Logproto.Chunk.t()]
-        }
-  defstruct [:from_ingester_id, :user_id, :labels, :chunks]
-
-  field(:from_ingester_id, 1, type: :string)
-  field(:user_id, 2, type: :string)
-  field(:labels, 3, repeated: true, type: Logproto.LabelPair)
-  field(:chunks, 4, repeated: true, type: Logproto.Chunk)
+  field :from_ingester_id, 1, type: :string, json_name: "fromIngesterId"
+  field :user_id, 2, type: :string, json_name: "userId"
+  field :labels, 3, repeated: true, type: Logproto.LabelPair
+  field :chunks, 4, repeated: true, type: Logproto.Chunk
 end
 
 defmodule Logproto.LabelPair do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          name: String.t(),
-          value: String.t()
-        }
-  defstruct [:name, :value]
+  field :name, 1, type: :string
+  field :value, 2, type: :string
+end
 
-  field(:name, 1, type: :string)
-  field(:value, 2, type: :string)
+defmodule Logproto.LegacyLabelPair do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :name, 1, type: :bytes
+  field :value, 2, type: :bytes
 end
 
 defmodule Logproto.Chunk do
   @moduledoc false
-  use Protobuf, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
-  @type t :: %__MODULE__{
-          data: binary
-        }
-  defstruct [:data]
-
-  field(:data, 1, type: :bytes)
+  field :data, 1, type: :bytes
 end
 
 defmodule Logproto.TransferChunksResponse do
   @moduledoc false
-  use Protobuf, syntax: :proto3
-
-  @type t :: %__MODULE__{}
-  defstruct []
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 end
 
-defmodule Logproto.Direction do
+defmodule Logproto.TailersCountRequest do
   @moduledoc false
-  use Protobuf, enum: true, syntax: :proto3
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+end
 
-  field(:FORWARD, 0)
-  field(:BACKWARD, 1)
+defmodule Logproto.TailersCountResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :count, 1, type: :uint32
+end
+
+defmodule Logproto.GetChunkIDsRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :matchers, 1, type: :string
+  field :start, 2, type: Google.Protobuf.Timestamp, deprecated: false
+  field :end, 3, type: Google.Protobuf.Timestamp, deprecated: false
+end
+
+defmodule Logproto.GetChunkIDsResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :chunkIDs, 1, repeated: true, type: :string
+end
+
+defmodule Logproto.ChunkRef do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :fingerprint, 1, type: :uint64, deprecated: false
+  field :user_id, 2, type: :string, json_name: "userId", deprecated: false
+  field :from, 3, type: :int64, deprecated: false
+  field :through, 4, type: :int64, deprecated: false
+  field :checksum, 5, type: :uint32, deprecated: false
+end
+
+defmodule Logproto.LabelValuesForMetricNameRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :metric_name, 1, type: :string, json_name: "metricName"
+  field :label_name, 2, type: :string, json_name: "labelName"
+  field :from, 3, type: :int64, deprecated: false
+  field :through, 4, type: :int64, deprecated: false
+  field :matchers, 5, type: :string
+end
+
+defmodule Logproto.LabelNamesForMetricNameRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :metric_name, 1, type: :string, json_name: "metricName"
+  field :from, 2, type: :int64, deprecated: false
+  field :through, 3, type: :int64, deprecated: false
+end
+
+defmodule Logproto.GetChunkRefRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :from, 1, type: :int64, deprecated: false
+  field :through, 2, type: :int64, deprecated: false
+  field :matchers, 3, type: :string
+end
+
+defmodule Logproto.GetChunkRefResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :refs, 1, repeated: true, type: Logproto.ChunkRef
+end
+
+defmodule Logproto.GetSeriesRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :from, 1, type: :int64, deprecated: false
+  field :through, 2, type: :int64, deprecated: false
+  field :matchers, 3, type: :string
+end
+
+defmodule Logproto.GetSeriesResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :series, 1, repeated: true, type: Logproto.IndexSeries, deprecated: false
+end
+
+defmodule Logproto.IndexSeries do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :labels, 1, repeated: true, type: Logproto.LabelPair, deprecated: false
+end
+
+defmodule Logproto.QueryIndexResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :QueryKey, 1, type: :string
+  field :rows, 2, repeated: true, type: Logproto.Row
+end
+
+defmodule Logproto.Row do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :rangeValue, 1, type: :bytes
+  field :value, 2, type: :bytes
+end
+
+defmodule Logproto.QueryIndexRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :Queries, 1, repeated: true, type: Logproto.IndexQuery
+end
+
+defmodule Logproto.IndexQuery do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :tableName, 1, type: :string
+  field :hashValue, 2, type: :string
+  field :rangeValuePrefix, 3, type: :bytes
+  field :rangeValueStart, 4, type: :bytes
+  field :valueEqual, 5, type: :bytes
+end
+
+defmodule Logproto.IndexStatsRequest do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :from, 1, type: :int64, deprecated: false
+  field :through, 2, type: :int64, deprecated: false
+  field :matchers, 3, type: :string
+end
+
+defmodule Logproto.IndexStatsResponse do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  field :streams, 1, type: :uint64, deprecated: false
+  field :chunks, 2, type: :uint64, deprecated: false
+  field :bytes, 3, type: :uint64, deprecated: false
+  field :entries, 4, type: :uint64, deprecated: false
 end

@@ -4,7 +4,7 @@ defmodule LokiLogger.MixProject do
   def project do
     [
       app: :loki_logger,
-      version: "0.3.0",
+      version: "0.3.1",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -25,13 +25,15 @@ defmodule LokiLogger.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:jason, "~> 1.4.0"},
       {:httpoison, "~> 2.1"},
-      {:json, "~> 1.3"},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:benchee, "~> 1.1.0", only: :test},
-      {:protobuf, "~> 0.9.0"},
-      {:google_protos, "~> 0.2.0"},
-      {:snappyer, "~> 1.2.8"}
+      {:tesla, "~> 1.8.0"},
+      {:finch, "~> 0.17"},
+      {:protobuf, "~> 0.10.0"},
+      {:google_protos, "~> 0.3.0"},
+      {:snappyer, "~> 1.2.8"},
     ]
   end
 
