@@ -205,8 +205,6 @@ defmodule LokiLogger do
   defp tesla_client(config) do
     req_opts = Keyword.get(config, :req_opts, [])
 
-    "request options: #{inspect(req_opts)}" |> IO.puts()
-
     http_headers = [
       {"Content-Type", "application/x-protobuf"},
       {"X-Scope-OrgID", Keyword.get(config, :loki_scope_org_id, "fake")}
