@@ -3,15 +3,15 @@ defmodule LokiLogger.MixProject do
 
   def project do
     [
-      app: :loki_logger,
-      version: "0.3.1",
+      app: :keen_loki_logger,
+      version: "0.4.0",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: description(),
       package: package(),
-      name: "Loki Logger",
-      source_url: "https://github.com/wardbekker/LokiLogger.git"
+      name: "Keen Loki Logger",
+      source_url: "https://github.com/KeenMate/elixir-loki-logger.git"
     ]
   end
 
@@ -26,28 +26,29 @@ defmodule LokiLogger.MixProject do
   defp deps do
     [
       {:jason, "~> 1.4.0"},
-      {:httpoison, "~> 2.1"},
-      {:ex_doc, ">= 0.0.0", only: :dev},
+      # {:httpoison, "~> 1.2"},
+      {:ex_doc, "~> 0.31.2", only: :dev},
       {:benchee, "~> 1.1.0", only: :test},
       {:tesla, "~> 1.8.0"},
       {:finch, "~> 0.17"},
       {:protobuf, "~> 0.10.0"},
       {:google_protos, "~> 0.3.0"},
-      {:snappyer, "~> 1.2.8"},
+      {:snappyer, "~> 1.2.8"}
     ]
   end
 
   defp description() do
-    "Elixir Logger Backend for Grafana Loki"
+    "Elixir Logger Backend for Grafana Loki - based on original loki_logger, which is dead since 2019, but enhanced from multiple forks and with plan to develop it further"
   end
 
   defp package() do
     [
-      name: "loki_logger",
+      name: "keen_loki_logger",
+      # organization: "keenmate",
       # These are the default files included in the package
       files: ~w(lib .formatter.exs mix.exs README* LICENSE*),
       licenses: ["Apache-2.0"],
-      links: %{"GitHub" => "https://github.com/wardbekker/LokiLogger.git"}
+      links: %{"GitHub" => "https://github.com/KeenMate/elixir-loki-logger.git"}
     ]
   end
 end

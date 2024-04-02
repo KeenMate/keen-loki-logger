@@ -148,7 +148,7 @@ defmodule LokiLogger.Exporter do
             body |> inspect() |> IO.puts()
 
           v ->
-            v |> inspect() |> IO.puts()
+            "Unable to connect to Loki service #{inspect(v)}" |> IO.puts()
         end
       end)
 

@@ -10,6 +10,6 @@ config :logger, :loki_logger,
   max_buffer: 300,
   loki_labels: %{application: "loki_logger_library", elixir_node: node()},
   loki_host: "http://localhost:3100",
-  loki_scope_org_id: "acme_inc"
+  loki_scope_org_id: "fake"
 
 import_config "#{config_env()}.exs"

@@ -13,12 +13,12 @@ defmodule LokiLogger do
             supervisor: nil
 
   def init(LokiLogger) do
-    config = Application.get_env(:logger, :loki_logger) || [level: :info]
+    config = Application.get_env(:logger, :keen_loki_logger) || [level: :info]
     {:ok, init(config, %__MODULE__{})}
   end
 
   def init({__MODULE__, opts}) when is_list(opts) do
-    config = configure_merge(Application.get_env(:logger, :loki_logger), opts)
+    config = configure_merge(Application.get_env(:logger, :keen_loki_logger), opts)
     {:ok, init(config, %__MODULE__{})}
   end
 
@@ -71,8 +71,9 @@ defmodule LokiLogger do
   end
 
   defp configure(options, state) do
-    config = configure_merge(Application.get_env(:logger, :loki_logger), options)
-    Application.put_env(:logger, :loki_logger, config)
+    config = configure_merge(Application.get_env(:logger, :keen_loki_logger), options)
+    Application.put_env(:logger, :keen_loki_logger, config)
+
     init(config, state)
   end
 
@@ -86,6 +87,13 @@ defmodule LokiLogger do
       Keyword.get(config, :loki_host, "http://localhost:3100") <>
         Keyword.get(config, :loki_path, "/loki/api/v1/push")
 
+
+    finch_protocols = Keyword.get(config, :finch_protocols, [:http1])
+    finch_pool_size = Keyword.get(config, :finch_pool_size, 16)
+    finch_pool_count = Keyword.get(config, :finch_pool_count, 4)
+    finch_pool_max_idle_time = Keyword.get(config, :finch_pool_max_idle_time, 10_000)
+    mint_conn_opts = Keyword.get(config, :mint_conn_opts)
+
     %{
       state
       | format: format,
@@ -97,11 +105,20 @@ defmodule LokiLogger do
         supervisor:
           Supervisor.start_link(
             [
-              {Finch,
-               name: LokiLogger.Finch,
-               pools: %{
-                 "#{loki_url}" => [size: 16, count: 4, pool_max_idle_time: 10_000]
-               }},
+              {
+                Finch,
+                # :public_key.cacerts_get()
+                name: LokiLogger.Finch,
+                pools: %{
+                  "#{loki_url}" => [
+                    protocols: finch_protocols,
+                    size: finch_pool_size,
+                    count: finch_pool_count,
+                    pool_max_idle_time: finch_pool_max_idle_time,
+                    conn_opts: mint_conn_opts
+                  ]
+                }
+              },
               {Task.Supervisor, name: LokiLogger.TaskSupervisor},
               {LokiLogger.Exporter,
                loki_labels:
@@ -148,9 +165,9 @@ defmodule LokiLogger do
   end
 
   defp async_io(output) do
-            output
+    output
     |> LokiLogger.Exporter.submit()
-    end
+  end
 
   defp format_event(level, msg, ts, md, %{format: format, metadata: keys} = _state) do
     List.to_string(Logger.Formatter.format(format, level, msg, ts, take_metadata(md, keys)))
@@ -186,6 +203,10 @@ defmodule LokiLogger do
   end
 
   defp tesla_client(config) do
+    req_opts = Keyword.get(config, :req_opts, [])
+
+    "request options: #{inspect(req_opts)}" |> IO.puts()
+
     http_headers = [
       {"Content-Type", "application/x-protobuf"},
       {"X-Scope-OrgID", Keyword.get(config, :loki_scope_org_id, "fake")}
@@ -207,6 +228,6 @@ defmodule LokiLogger do
           {Tesla.Middleware.Headers, http_headers}
         ]
     end
-    |> Tesla.client({Tesla.Adapter.Finch, name: LokiLogger.Finch})
+    |> Tesla.client({Tesla.Adapter.Finch, name: LokiLogger.Finch, opts: req_opts})
   end
 end
