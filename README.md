@@ -42,9 +42,9 @@ On Windows machines you might have issues compiling your project because of `sna
 Use these steps to be able to compile it without issues:
 
 - Use command line and not PowerShell!
-- Install Microsoft C++ toolset, you don't have to go full C++ development, just the compilation toolset is fine
-- Add this c:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\bin\Hostx64\x64\ or similar path (based on your installed version) to PATH environment variable, this will allow add cl.exe to path
-- Before compilation run "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat" which you should have by now. This setups all environment variables needed for compilation of C/++ code, including standard .h files
+- Install [Microsoft C++ toolset](https://learn.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170#download-and-install-the-tools], you don't have to go full C++ development, just the compilation toolset is fine
+- Add this `c:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.37.32822\bin\Hostx64\x64\` or similar path (based on your installed version) to PATH environment variable, this will add `cl.exe` to path
+- Before compilation run `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"` which you should have by now. This setups all environment variables needed for compilation of C/++ code, including standard `.h` files
 
 We have this script in our project to setup the environment.
 
