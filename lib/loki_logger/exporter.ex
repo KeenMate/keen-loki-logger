@@ -88,6 +88,7 @@ defmodule LokiLogger.Exporter do
       |> Enum.join(",")
 
     labels = "{" <> labels <> "}"
+
     # sort entries on epoch seconds as first element of tuple, to prevent out-of-order entries
     sorted_entries =
       output

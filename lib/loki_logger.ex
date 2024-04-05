@@ -94,6 +94,8 @@ defmodule LokiLogger do
     finch_pool_max_idle_time = Keyword.get(config, :finch_pool_max_idle_time, 10_000)
     mint_conn_opts = Keyword.get(config, :mint_conn_opts)
 
+    loki_labels = Keyword.get(config, :loki_labels, %{application: "loki_logger_library"})
+
     %{
       state
       | format: format,
@@ -121,8 +123,7 @@ defmodule LokiLogger do
               },
               {Task.Supervisor, name: LokiLogger.TaskSupervisor},
               {LokiLogger.Exporter,
-               loki_labels:
-                 Keyword.get(config, :loki_labels, %{application: "loki_logger_library"}),
+               loki_labels: loki_labels,
                loki_url: loki_url,
                tesla_client: config |> tesla_client()}
             ],
