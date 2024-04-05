@@ -1,4 +1,4 @@
-# LokiLogger
+# keen_loki_logger - Elixir Logger backend for Loki service
 
 KeenLokiLogger is an Elixir logger backend, based on original [LokiLogger](https://github.com/wardbekker/LokiLogger), which development is dead from 2019, providing support for Logging to [Grafana Loki](https://github.com/grafana/loki)
 
