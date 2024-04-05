@@ -17,7 +17,7 @@ Some of the features were reworked, some implemented and some are still missing.
 * [x] Loki Scope-Org-Id header for multi-tenancy
 * [x] Timezone aware
 * [X] Snappy compressed proto format in the HTTP Body  
-* [ ] Async http call to backend.
+* [X] Async http call to backend. _This needs to be properly tested and reviewed, though._
 * [ ] Proper unit tests.
 * [ ] HTTP post retry strategy on temporary loki backend failure or network hiccups.
 * [X] Authentication with basic auth.
