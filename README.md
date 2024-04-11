@@ -36,7 +36,7 @@ def deps do
 end
 ```
 
-### WINDOWS MACHINES STRUGGLES
+### STRUGGLES ON WINDOWS MACHINES
 
 On Windows machines you might have issues compiling your project because of `snappyer` package that requires C/++ code compilation.
 Use these steps to be able to compile it without issues:
