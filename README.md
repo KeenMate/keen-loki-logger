@@ -55,6 +55,8 @@ call "c:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 mix deps.get && mix deps.compile
 ```
 
+> If you still have issues, run `mix` in debug mode by setting environment variable `MIX_DEBUG=1`
+
 ## Configuration
 
 ### Elixir Project
