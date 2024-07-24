@@ -38,6 +38,10 @@ end
 
 ### STRUGGLES ON WINDOWS MACHINES
 
+> [!CAUTION]
+> IT IS ABSOLUTELY CRUCIAL TO RUN EVERYTHING, INCLUDING THE FIRST `mix deps.get` IN X64 COMMAND LINE, OTHERWISE YOU'LL BE STUCK IN DEPS BEING DOWNLOADED FOR X86 ENVIRONMENT, BUT LATER TRYING TO BE COMPILED BY rebar3 TO X64, WHICH FAILS WITH NO VISIBLE ERROR AND `DIAGNOSTIC=1` HAS TO BE SET TO INVESTIGATE IT
+> IF YOU DOWNLOADED DEPS IN X86 TERMINAL, DELETE BOTH `deps` and `_build` FOLDERS
+
 On Windows machines you might have issues compiling your project because of `snappyer` package that requires C/++ code compilation.
 Use these steps to be able to compile it without issues:
 
