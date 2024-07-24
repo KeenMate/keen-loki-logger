@@ -55,7 +55,9 @@ call "c:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 mix deps.get && mix deps.compile
 ```
 
-> If you still have issues, run `mix` in debug mode by setting environment variable `MIX_DEBUG=1`
+> If you still have issues
+> - run `mix` in debug mode of `mix` by setting environment variable `MIX_DEBUG=1`
+> - and debug mode of `rebar3` by setting environment variable `DIAGNOSTIC=1`
 
 ## Configuration
 
