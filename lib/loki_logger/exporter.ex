@@ -97,21 +97,21 @@ defmodule LokiLogger.Exporter do
         seconds = Kernel.trunc(ts / 1_000_000_000)
         nanos = ts - seconds * 1_000_000_000
 
-        Logproto.EntryAdapter.new(
-          timestamp: Google.Protobuf.Timestamp.new(seconds: seconds, nanos: nanos),
+        %Logproto.EntryAdapter{
+          timestamp: %Google.Protobuf.Timestamp{seconds: seconds, nanos: nanos},
           line: line
-        )
+        }
       end)
 
     request =
-      Logproto.PushRequest.new(
+      %Logproto.PushRequest{
         streams: [
-          Logproto.StreamAdapter.new(
+          %Logproto.StreamAdapter{
             labels: labels,
             entries: sorted_entries
-          )
+          }
         ]
-      )
+      }
 
     {:ok, bin_push_request} =
       Logproto.PushRequest.encode(request)

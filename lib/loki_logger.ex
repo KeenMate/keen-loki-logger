@@ -87,14 +87,37 @@ defmodule LokiLogger do
       Keyword.get(config, :loki_host, "http://localhost:3100") <>
         Keyword.get(config, :loki_path, "/loki/api/v1/push")
 
-
     finch_protocols = Keyword.get(config, :finch_protocols, [:http1])
     finch_pool_size = Keyword.get(config, :finch_pool_size, 16)
     finch_pool_count = Keyword.get(config, :finch_pool_count, 4)
     finch_pool_max_idle_time = Keyword.get(config, :finch_pool_max_idle_time, 10_000)
-    mint_conn_opts = Keyword.get(config, :mint_conn_opts)
+    mint_conn_opts = Keyword.get(config, :mint_conn_opts, [])
 
     loki_labels = Keyword.get(config, :loki_labels, %{application: "loki_logger_library"})
+
+    {:ok, supervisor_pid} =
+      Supervisor.start_link(
+        [
+          {
+            Finch,
+            # :public_key.cacerts_get()
+            name: LokiLogger.Finch,
+            pools: %{
+              "#{loki_url}" => [
+                protocols: finch_protocols,
+                size: finch_pool_size,
+                count: finch_pool_count,
+                pool_max_idle_time: finch_pool_max_idle_time,
+                conn_opts: mint_conn_opts
+              ]
+            }
+          },
+          {Task.Supervisor, name: LokiLogger.TaskSupervisor},
+          {LokiLogger.Exporter,
+           loki_labels: loki_labels, loki_url: loki_url, tesla_client: config |> tesla_client()}
+        ],
+        strategy: :one_for_one
+      )
 
     %{
       state
@@ -104,31 +127,7 @@ defmodule LokiLogger do
           |> configure_metadata(),
         level: level,
         max_buffer: Keyword.get(config, :max_buffer, 32),
-        supervisor:
-          Supervisor.start_link(
-            [
-              {
-                Finch,
-                # :public_key.cacerts_get()
-                name: LokiLogger.Finch,
-                pools: %{
-                  "#{loki_url}" => [
-                    protocols: finch_protocols,
-                    size: finch_pool_size,
-                    count: finch_pool_count,
-                    pool_max_idle_time: finch_pool_max_idle_time,
-                    conn_opts: mint_conn_opts
-                  ]
-                }
-              },
-              {Task.Supervisor, name: LokiLogger.TaskSupervisor},
-              {LokiLogger.Exporter,
-               loki_labels: loki_labels,
-               loki_url: loki_url,
-               tesla_client: config |> tesla_client()}
-            ],
-            strategy: :one_for_one
-          )
+        supervisor: supervisor_pid
     }
   end
 
